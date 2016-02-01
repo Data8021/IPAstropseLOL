@@ -1,6 +1,10 @@
 ## Function to fetch one or more league tournaments
 
+
 fetchLeagueTournaments <- function(league = "all") {
+  
+  suppressMessages(suppressWarnings(library(jsonlite)))
+  suppressMessages(suppressWarnings(library(dplyr)))
   
   ## set up vector of leagues
   leagues = c(1,2,3,4,5,6,7,8,9,12,14,17,18)
@@ -41,66 +45,137 @@ fetchLeagueTournaments <- function(league = "all") {
     stop("League does not exist.")
   }
   
+  ## Initialize list to hold league tournaments
+  leagueTournamentList <- vector("list", length(league))
+  names(leagueTournamentList) <- league
   
-  leagues <- leagues[league]
-  return(leagues)
-}
-
-  
-  
-     
-  
-
-
-
-
-
-
-leagues <- 1:50
-
-
-## Initialize list to hold schedules
-scheduleList <- vector("list", length(leagues))
-names(scheduleList) <- leagues
-
-for (i in 1:length(leagues)) {
-  scheduleList[[i]] <- fromJSON(paste0("http://api.lolesports.com/api/v2/highlanderTournaments?league=", leagues[i]))
-}
-
-for (j in 1:length(scheduleList)) {
-  
-  if (!is.null(names(scheduleList[[j]][[1]]))) {
-    print(paste(names(scheduleList[j]), scheduleList[[j]][[2]][[2]], sep=" - "))
+  ## Loop through each league requested and download faw tournament file from API
+  for (i in 1:length(league)) {
+    leagueTournamentList[[i]] <- fromJSON(paste0("http://api.lolesports.com/api/v2/highlanderTournaments?league=", leagues[league[i]]))
+    
+    ## return i for tracking status
+    print(paste0("leagueTournamentList Loop ", i))
   }
   
+  ## Put final DF in global env
+  assign("leagueTournamentList", leagueTournamentList, envir = .GlobalEnv)
 }
 
+## Save raw tournament list files
+save(leagueTournamentList, file="data/leagueTournamentList.Rda")
 
-leagues <- 2
+## Load raw tournament list files
+load("data/leagueTournamentList.Rda")
+  
+extractRosters <- function(rawTournList = leagueTournamentList){
+  
+  ## Create dataframe to hold roster information
+  tournamentRosters <- data.frame(rosterID = character(),
+                                  rosterTeamAcro = character(),
+                                  rosterTeamID = numeric(),
+                                  rosterPlayerName = character(),
+                                  rosterPlayerID = numeric(),
+                                  tournamentID = character(),
+                                  stringsAsFactors = FALSE)
+  
+  ## Loop through each league
+  for (i in 1:length(rawTournList)){
+    
+    ## Extract rosters 
+    rosterList <- as.list(rawTournList[[i]][["highlanderTournaments"]][["rosters"]])
+    
+    ## Store tournament IDs
+    tournamentID <- rawTournList[[i]][["highlanderTournaments"]][["id"]]
+    
+    ## Loop through each roster
+    for (j in 1:length(rosterList)){
+      
+      ## Determine if team or player roster
+      if ("player" %in% names(rosterList[[j]])) {
+        
+        rosterID <- rosterList[[j]][["id"]]
+        rosterPlayerName <- rosterList[[j]][["name"]]
+        rosterPlayerID <- rosterList[[j]][["player"]]
+        
+        numRosters <-length(rosterList[[j]][["id"]])
+        rosterTeamAcro <- rep(NA_character_, times=numRosters)
+        rosterTeamID <- rep(NA_real_, times=numRosters)
+        
+        tournamentRostersTemp <- data.frame(rosterID,
+                                            rosterTeamAcro,
+                                            rosterTeamID,
+                                            rosterPlayerName,
+                                            rosterPlayerID,
+                                            tournamentID,
+                                            stringsAsFactors = FALSE)
+        
+      } else {
+        
+        rosterID <- rosterList[[j]][["id"]]
+        rosterTeamAcro <- rosterList[[j]][["name"]]
+        rosterTeamID <- rosterList[[j]][["team"]]
+        
+        numRosters <-length(rosterList[[j]][["id"]])
+        rosterPlayerName <- rep(NA_character_, times=numRosters)
+        rosterPlayerID <- rep(NA_real_, times=numRosters)
+        
+        tournamentRostersTemp <- data.frame(rosterID,
+                                            rosterTeamAcro,
+                                            rosterTeamID,
+                                            rosterPlayerName,
+                                            rosterPlayerID,
+                                            tournamentID,
+                                            stringsAsFactors = FALSE)
 
-## Initialize list to hold schedules
-scheduleList2 <- vector("list", length(leagues))
-names(scheduleList2) <- leagues
-
-for (i in 1:length(leagues)) {
-  scheduleList2[[i]] <- fromJSON(paste0("http://api.lolesports.com/api/v2/highlanderTournaments?league=", leagues[i]))
+      }
+      
+      ## Remove rows with no rosterID
+      tournamentRostersTemp <- tournamentRostersTemp[!(is.na(tournamentRostersTemp$rosterID)),]
+      
+      ## Bind with full roster list
+      tournamentRosters <- rbind(tournamentRosters, tournamentRostersTemp)
+      
+      # return j for tracking status
+      print(paste0("roster Loop", j))
+    
+    }
+    
+    ## return i for tracking status
+    print(paste0("rawTournList Loop", i))
+    
+  }
+  
+  ## Put final DF in global env
+  assign("tournamentRosters", tournamentRosters, envir = .GlobalEnv)
+  
 }
 
-## Identify leagues to scrape schedules of
-leagues <- c(1,2,3,4,5,6,7,8,9,12,14,17,18)
+## Save tournament roster df
+save(tournamentRosters, file="data/tournamentRosters.Rda")
 
-## Initialize list to hold schedules
-scheduleList <- vector("list", length(leagues))
-names(scheduleList) <- leagues
+## Load tournament roster df
+load("data/tournamentRosters.Rda")
 
-## Loop through schedules
-for (i in 1:length(leagues)) {
-  
-  scheduleList[[i]] <- fromJSON(paste0("http://api.lolesports.com/api/v1/scheduleItems?leagueId=", leagues[i]))
-  
-}
-
-for (j in 1:length(scheduleList)) {
-  
-  
-}
+     
+##NOTES  
+# http://api.lolesports.com/api/v2/highlanderTournaments?league=2
+# 
+# THEN
+# 
+# http://api.lolesports.com/api/v2/tournamentPlayerStats?tournamentId=6090e92b-d565-41c4-8548-06570ab26fb7
+# 
+# THEN
+# 
+# http://api.lolesports.com/api/v1/teams?slug=team-solomid&&tournament=6090e92b-d565-41c4-8548-06570ab26fb7
+# 
+# THEN MAYBE
+# 
+# http://api.lolesports.com/api/v1/players?slug=faker&tournament=91be3d78-874a-44e0-943f-073d4c9d7bf6
+# 
+#   
+# ## Loop through schedules???
+# for (i in 1:length(leagues)) {
+#   
+#   scheduleList[[i]] <- fromJSON(paste0("http://api.lolesports.com/api/v1/scheduleItems?leagueId=", leagues[i]))
+#   
+# }
