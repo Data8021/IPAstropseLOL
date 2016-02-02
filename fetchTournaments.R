@@ -51,7 +51,10 @@ fetchLeagueTournaments <- function(league = "all") {
   
   ## Loop through each league requested and download faw tournament file from API
   for (i in 1:length(league)) {
-    leagueTournamentList[[i]] <- fromJSON(paste0("http://api.lolesports.com/api/v2/highlanderTournaments?league=", leagues[league[i]]))
+    leagueTournamentList[[i]] <- fromJSON(paste0("http://api.lolesports.com/api/v2/highlanderTournaments?league=", leagues[league[i]]),
+                                          simplifyVector = FALSE,
+                                          simplifyDataFrame = FALSE,
+                                          simplifyMatrix = FALSE)
     
     ## return i for tracking status
     print(paste0("leagueTournamentList Loop ", i))
