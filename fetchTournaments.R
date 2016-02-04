@@ -3,6 +3,7 @@
 
 fetchLeagueTournaments <- function(league = "all") {
   suppressMessages(suppressWarnings(library(jsonlite)))
+  suppressMessages(suppressWarnings(library(dplyr)))
   
   ## Get environment
   funcEnv <- environment()
@@ -67,18 +68,28 @@ fetchLeagueTournaments <- function(league = "all") {
   ## Merge in Roster information
   mergeRoster(rosterDF = tournamentRosters, gamesDF = leagueGames, environment = funcEnv)
 
+  ## Extract list of unique tournamentIDs
+  tournamentList <- select(leagueGames, tournamentID) %>%
+    distinct()
+  
+  ## Fetch player tournament stats
+  fetchPlayerStats(tournamentList = tournamentList, environment = funcEnv)
+  
   ## Put processed work into global env
   assign("leagueTournamentList", leagueTournamentList, envir = .GlobalEnv)
   ## assign("tournamentRosters", tournamentRosters, envir = .GlobalEnv)  
   assign("leagueGames", leagueGames, envir = .GlobalEnv)  
+  assign("playerStatsTourn", playerStatsTourn, envir = .GlobalEnv)
 }
 
 ## Save processed data
 save(leagueTournamentList, file="data/leagueTournamentList.Rda")
 save(leagueGames, file="data/leagueGames.Rda")
 save(tournamentRosters, file="data/tournamentRosters.Rda")
+save(playerStatsTourn, file="data/playerStatsTourn.Rda")
 
 ## Load processed data
 load("data/leagueTournamentList.Rda")
 load("data/leagueGames.Rda")
 load("data/tournamentRosters.Rda")
+load("data/playerStatsTourn.Rda")
