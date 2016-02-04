@@ -1,7 +1,7 @@
 ## Function to extract high level game information from
 ## a complete list of league tournament files
 
-extractGameList <- function(league = "all", rawTournList = leagueTournamentList){
+extractGameList <- function(league = "all", rawTournList = leagueTournamentList, environment = .GlobalEnv){
   
   ## set up vector of leagues
   leagues = c(1,2,3,4,5,6,7,8,9,12,14,17,18)
@@ -224,8 +224,8 @@ extractGameList <- function(league = "all", rawTournList = leagueTournamentList)
     
   }
   
-  ## Put final DF in global env
-  assign("leagueGames", leagueGames, envir = .GlobalEnv)
+  ## Put final DF in specified env
+  assign("leagueGames", leagueGames, envir = environment)
   
 }
 

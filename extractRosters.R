@@ -1,7 +1,7 @@
 ## Function to extract all rosters from a complete list
 ## of league tournament files
 
-extractRosters <- function(rawTournList = leagueTournamentList){
+extractRosters <- function(rawTournList = leagueTournamentList, environment = .GlobalEnv){
   
   ## Create dataframe to hold roster information
   tournamentRosters <- data.frame(rosterID = character(),
@@ -78,13 +78,8 @@ extractRosters <- function(rawTournList = leagueTournamentList){
     
   }
   
-  ## Put final DF in global env
-  assign("tournamentRosters", tournamentRosters, envir = .GlobalEnv)
+  ## Put final DF in specified env
+  assign("tournamentRosters", tournamentRosters, envir = environment)
   
 }
 
-## Save tournament roster df
-save(tournamentRosters, file="data/tournamentRosters.Rda")
-
-## Load tournament roster df
-load("data/tournamentRosters.Rda")

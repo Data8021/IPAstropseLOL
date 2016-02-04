@@ -2,9 +2,10 @@
 
 
 fetchLeagueTournaments <- function(league = "all") {
-  
   suppressMessages(suppressWarnings(library(jsonlite)))
-  suppressMessages(suppressWarnings(library(dplyr)))
+  
+  ## Get environment
+  funcEnv <- environment()
   
   ## set up vector of leagues
   leagues = c(1,2,3,4,5,6,7,8,9,12,14,17,18)
@@ -57,18 +58,27 @@ fetchLeagueTournaments <- function(league = "all") {
                                           simplifyMatrix = FALSE)
   }
   
-  ## Put final DF in global env
-  assign("leagueTournamentList", leagueTournamentList, envir = .GlobalEnv)
-  
   ## Extract game data from tournament files
-  extractGameList(league = league, rawTournList = leagueTournamentList)
+  extractGameList(league = league, rawTournList = leagueTournamentList, environment = funcEnv)
   
+  ## Extract roster data from tournament files
+  extractRosters(rawTournList = leagueTournamentList, environment = funcEnv)
+  
+  ## Merge in Roster information
+  mergeRoster(rosterDF = tournamentRosters, gamesDF = leagueGames, environment = funcEnv)
+
+  ## Put processed work into global env
+  assign("leagueTournamentList", leagueTournamentList, envir = .GlobalEnv)
+  ## assign("tournamentRosters", tournamentRosters, envir = .GlobalEnv)  
+  assign("leagueGames", leagueGames, envir = .GlobalEnv)  
 }
 
-## Save raw tournament list files and the games DF
+## Save processed data
 save(leagueTournamentList, file="data/leagueTournamentList.Rda")
 save(leagueGames, file="data/leagueGames.Rda")
+save(tournamentRosters, file="data/tournamentRosters.Rda")
 
-## Load raw tournament list files and the games DF
+## Load processed data
 load("data/leagueTournamentList.Rda")
 load("data/leagueGames.Rda")
+load("data/tournamentRosters.Rda")
