@@ -11,13 +11,21 @@ fetchPlayerStats <- function(tournamentList = tournamentList, environment = .Glo
   ## Loop through each tournament
   for (i in 1:nrow(tournamentList)) {
     
+    ## Fetch player stats and conver to df
     playerStatsTournTemp <- fromJSON(paste0("http://api.lolesports.com/api/v2/tournamentPlayerStats?tournamentId=", tournamentList[i, 1]))[[1]]
     
-    ## Extract df from list
-    playerStatsTournTemp <- playerStatsTournTemp
+    ## Test if any player stats exist
+    if (!(length(playerStatsTournTemp) == 0)) {
+        
+        ## Add tournament id
+        playerStatsTournTemp <- mutate(playerStatsTournTemp, tournamentID = tournamentList[i, 1])
+        
+        ## Bind the temp df onto full one
+        playerStatsTourn <- rbind(playerStatsTourn, playerStatsTournTemp)
+        
+    }
     
-    ## Bind the temp df onto full one
-    playerStatsTourn <- rbind(playerStatsTourn, playerStatsTournTemp)
+
   }
   
   ## Rename variables
