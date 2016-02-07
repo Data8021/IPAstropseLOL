@@ -19,6 +19,10 @@ THEN MAYBE
  
 http://api.lolesports.com/api/v1/players?slug=faker&tournament=91be3d78-874a-44e0-943f-073d4c9d7bf6
 
+DONE!!
+
+Need to figure out best way to merge data for analysis.
+
 THEN
 
 http://api.lolesports.com/api/v2/highlanderMatchDetails?tournamentId=   &matchId=

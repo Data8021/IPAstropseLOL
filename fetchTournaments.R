@@ -75,11 +75,18 @@ fetchLeagueTournaments <- function(league = "all") {
   ## Fetch player tournament stats
   fetchPlayerStats(tournamentList = tournamentList, environment = funcEnv)
   
+  ## Create player and team databases
+  createTeamPlayerDatabase(tournamentList = tournamentList, environment = funcEnv)
+  
   ## Put processed work into global env
   assign("leagueTournamentList", leagueTournamentList, envir = .GlobalEnv)
   ## assign("tournamentRosters", tournamentRosters, envir = .GlobalEnv)  
   assign("leagueGames", leagueGames, envir = .GlobalEnv)  
   assign("playerStatsTourn", playerStatsTourn, envir = .GlobalEnv)
+  assign("playersDatabase", playersDatabase, envir = .GlobalEnv)
+  assign("teamsDatabase", teamsDatabase, envir = .GlobalEnv)  
+  assign("teamPlayersDatabase", teamPlayersDatabase, envir = .GlobalEnv)
+  
 }
 
 ## Save processed data
@@ -87,9 +94,15 @@ save(leagueTournamentList, file="data/leagueTournamentList.Rda")
 save(leagueGames, file="data/leagueGames.Rda")
 save(tournamentRosters, file="data/tournamentRosters.Rda")
 save(playerStatsTourn, file="data/playerStatsTourn.Rda")
+save(playersDatabase, file="data/playersDatabase.Rda")
+save(teamsDatabase, file="data/teamsDatabase.Rda")
+save(teamPlayersDatabase, file="data/teamPlayersDatabase.Rda")
 
 ## Load processed data
 load("data/leagueTournamentList.Rda")
 load("data/leagueGames.Rda")
 load("data/tournamentRosters.Rda")
 load("data/playerStatsTourn.Rda")
+load("data/playersDatabase.Rda")
+load("data/teamsDatabase.Rda")
+load("data/teamPlayersDatabase.Rda")
