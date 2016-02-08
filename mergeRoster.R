@@ -13,16 +13,16 @@ mergeRoster <- function(rosterDF = tournamentRosters, gamesDF = leagueGames, env
     
     ## Rename roster variables for blue team
     rosterDF <- rename(rosterDF, rosterBlue = rosterID,
-                                 rosterBlueTeamAcro = rosterTeamAcro,
-                                 rosterBlueTeamID = rosterTeamID)
+                                 blueTeamAcro = rosterTeamAcro,
+                                 blueTeamID = rosterTeamID)
     
     ## Merge for blue team
     gamesDF <- suppressMessages(left_join(gamesDF, rosterDF))
     
     ## Rename roster variables for red team
     rosterDF <- rename(rosterDF, rosterRed = rosterBlue,
-                                 rosterRedTeamAcro = rosterBlueTeamAcro,
-                                 rosterRedTeamID = rosterBlueTeamID)
+                                 redTeamAcro = blueTeamAcro,
+                                 redTeamID = blueTeamID)
     
     ## Merge for red team
     gamesDF <- suppressMessages(left_join(gamesDF, rosterDF))

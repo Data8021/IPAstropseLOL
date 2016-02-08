@@ -78,6 +78,21 @@ fetchLeagueTournaments <- function(league = "all") {
   ## Create player and team databases
   createTeamPlayerDatabase(tournamentList = tournamentList, environment = funcEnv)
   
+  ## Update leageGames with blue team names
+  teamNames <- select(teamsDatabase,
+                      blueTeamID = teamID,
+                      blueTeamName = teamName) %>%
+    distinct()
+  teamNames$blueTeamID <- as.character(teamNames$blueTeamID)
+  leagueGames <- left_join(leagueGames, teamNames)
+  
+  ## Update leagueGames with red team names
+  teamNames <- rename(teamNames,
+                      redTeamID = blueTeamID,
+                      redTeamName = blueTeamName)
+  leagueGames <- left_join(leagueGames, teamNames)
+  
+  
   ## Put processed work into global env
   assign("leagueTournamentList", leagueTournamentList, envir = .GlobalEnv)
   ## assign("tournamentRosters", tournamentRosters, envir = .GlobalEnv)  

@@ -21,9 +21,9 @@ http://api.lolesports.com/api/v1/players?slug=faker&tournament=91be3d78-874a-44e
 
 DONE!!
 
-Need to figure out best way to merge data for analysis.
-
-THEN
+Merge blueTeamID, blueTeamAcro and tournamentID with teamsDatabase, rename variables
+Merge redTeamID, redTeamAcro and tournamentID with teamsDatabase, rename variables
+Merge players now?? or wait until after match details or game details???
 
 http://api.lolesports.com/api/v2/highlanderMatchDetails?tournamentId=   &matchId=
 
