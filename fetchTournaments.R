@@ -84,16 +84,19 @@ fetchLeagueTournaments <- function(league = "all") {
                       blueTeamName = teamName) %>%
     distinct()
   teamNames$blueTeamID <- as.character(teamNames$blueTeamID)
-  leagueGames <- left_join(leagueGames, teamNames)
+  suppressMessages(leagueGames <- left_join(leagueGames, teamNames))
   
   ## Update leagueGames with red team names
   teamNames <- rename(teamNames,
                       redTeamID = blueTeamID,
                       redTeamName = blueTeamName)
-  leagueGames <- left_join(leagueGames, teamNames)
+  suppressMessages(leagueGames <- left_join(leagueGames, teamNames))
   
   ## Fetch gamehash and merge with leagueGames
   fetchGameHash(gamesDF = leagueGames, environment = funcEnv)
+  
+  ## Fetch game data
+  
   
   
   ## Put processed work into global env
