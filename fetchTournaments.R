@@ -92,6 +92,9 @@ fetchLeagueTournaments <- function(league = "all") {
                       redTeamName = blueTeamName)
   leagueGames <- left_join(leagueGames, teamNames)
   
+  ## Fetch gamehash and merge with leagueGames
+  fetchGameHash(gamesDF = leagueGames, environment = funcEnv)
+  
   
   ## Put processed work into global env
   assign("leagueTournamentList", leagueTournamentList, envir = .GlobalEnv)

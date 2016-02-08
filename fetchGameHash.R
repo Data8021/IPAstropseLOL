@@ -25,7 +25,14 @@ fetchGameHash <- function(gamesDF = leagueGames, environment = .GlobalEnv){
     
     ## Bind temp df onto full df
     gameIDMap <- rbind(gameIDMap, gameIDMapTemp)
+
   }
+  
+  ## Remove duplicates
+  gameIDMap <- distinct(gameIDMap)
+      
+  ## Merge gameHash into gamesDF
+  leagueGames <- left_join(gamesDF, gameIDMap)
   
   ## Put final DF in specified env
   assign("leagueGames", leagueGames, envir = environment)
