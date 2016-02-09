@@ -5,17 +5,20 @@ fetchGameHash <- function(gamesDF = leagueGames, environment = .GlobalEnv){
   suppressMessages(suppressWarnings(library(dplyr)))
   
   ## Remove games without gameHash
-  gamesDF <- filter(gamesDF, gameHash != "NA") 
+  gamesDF <- filter(gamesDF, gameHash != "NA", blueTeamID !="NA") 
+  
+  team1 <- vector()
   
   ## Loop through all games
   for (i in 1:nrow(gamesDF)){
+    print(i)
     
     ## Fetch game JSON file
     gameDataTemp <- fromJSON(paste0("https://acs.leagueoflegends.com/v1/stats/game/",
-                                         gamesDF[i, "gameRealm"], "/", gamesDF[i, "gameCode"], "?gameHash=", 
-                                         gamesDF[i, "gameHash"]))
+                                           gamesDF[i, "gameRealm"], "/", gamesDF[i, "gameCode"], "?gameHash=", 
+                                           gamesDF[i, "gameHash"]))
     
-    
+  
     
   }
   
