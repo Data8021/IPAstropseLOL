@@ -5,25 +5,47 @@ fetchGameHash <- function(gamesDF = leagueGames, environment = .GlobalEnv){
   suppressMessages(suppressWarnings(library(dplyr)))
   
   ## Remove games without gameHash
-  gamesDF <- filter(gamesDF, gameHash != "NA", blueTeamID !="NA") 
+  gamesDF <- filter(gamesDF, gameHash != "NA") 
   
-  team1 <- vector()
+  gamesListNames <- gamesDF$gameHash
+  fullGameList <- vector("list", length(gamesListNames))
+  names(fullGameList) <- gamesListNames
+  rm(gamesListNames)
   
   ## Loop through all games
   for (i in 1:nrow(gamesDF)){
     print(i)
     
     ## Fetch game JSON file
-    gameDataTemp <- fromJSON(paste0("https://acs.leagueoflegends.com/v1/stats/game/",
+    fullGameList[[i]] <- fromJSON(paste0("https://acs.leagueoflegends.com/v1/stats/game/",
                                            gamesDF[i, "gameRealm"], "/", gamesDF[i, "gameCode"], "?gameHash=", 
                                            gamesDF[i, "gameHash"]))
     
-  
+    
+    
     
   }
   
+  
+  players <- vector()
+  
+  for (i in 1:length(fullGameList)){
+    
+    players <- c(players, fullGameList[[i]][[13]][[2]][[1]])
+    
+  }
+  
+  uniplayers <- unique(players)
+  
+  uniplayers <- sapply(uniplayers, function(x) gsub(".* ","", x))
+  uniplayers <- unname(uniplayers)
+  
+  inPlayerDB <- sapply(uniplayers, function(x) x %in% playerStatsTourn$playerName)
+  
+  notInDB <- uniplayers[!inPlayerDB]
+  
   ## Put final DF in specified env
-  assign("leagueGames", leagueGames, envir = environment)
+  ##assign("leagueGames", leagueGames, envir = environment)
   
 }
 

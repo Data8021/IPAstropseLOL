@@ -62,12 +62,6 @@ fetchLeagueTournaments <- function(league = "all") {
   ## Extract game data from tournament files
   extractGameList(league = league, rawTournList = leagueTournamentList, environment = funcEnv)
   
-  ## Extract roster data from tournament files
-  extractRosters(rawTournList = leagueTournamentList, environment = funcEnv)
-  
-  ## Merge in Roster information
-  mergeRoster(rosterDF = tournamentRosters, gamesDF = leagueGames, environment = funcEnv)
-
   ## Extract list of unique tournamentIDs
   tournamentList <- select(leagueGames, tournamentID) %>%
     distinct()
@@ -77,20 +71,6 @@ fetchLeagueTournaments <- function(league = "all") {
   
   ## Create player and team databases
   createTeamPlayerDatabase(tournamentList = tournamentList, environment = funcEnv)
-  
-  ## Update leageGames with blue team names
-  teamNames <- select(teamsDatabase,
-                      blueTeamID = teamID,
-                      blueTeamName = teamName) %>%
-    distinct()
-  teamNames$blueTeamID <- as.character(teamNames$blueTeamID)
-  suppressMessages(leagueGames <- left_join(leagueGames, teamNames))
-  
-  ## Update leagueGames with red team names
-  teamNames <- rename(teamNames,
-                      redTeamID = blueTeamID,
-                      redTeamName = blueTeamName)
-  suppressMessages(leagueGames <- left_join(leagueGames, teamNames))
   
   ## Fetch gamehash and merge with leagueGames
   fetchGameHash(gamesDF = leagueGames, environment = funcEnv)
@@ -119,6 +99,8 @@ save(playersDatabase, file="data/playersDatabase.Rda")
 save(teamsDatabase, file="data/teamsDatabase.Rda")
 save(teamPlayersDatabase, file="data/teamPlayersDatabase.Rda")
 
+save(fullGameList, file="data/fullGameList.Rda")
+
 ## Load processed data
 load("data/leagueTournamentList.Rda")
 load("data/leagueGames.Rda")
@@ -127,3 +109,4 @@ load("data/playerStatsTourn.Rda")
 load("data/playersDatabase.Rda")
 load("data/teamsDatabase.Rda")
 load("data/teamPlayersDatabase.Rda")
+load("data/fullGameList.Rda")

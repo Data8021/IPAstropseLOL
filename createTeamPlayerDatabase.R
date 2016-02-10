@@ -14,15 +14,13 @@ createTeamPlayerDatabase <- function(tournamentList = tournamentList, environmen
         distinct()
     
     ## Initialize dfs
-    playersDatabase <- data.frame(matrix(ncol = 12, nrow = 0))
+    playersDatabase <- data.frame(matrix(ncol = 11, nrow = 0))
     teamsDatabase <- data.frame(matrix(ncol = 7, nrow = 0))
     teamPlayersDatabase <- data.frame(matrix(ncol = 3, nrow = 0))
     
     ## Loop through each team in each tournament
     for (i in 1:nrow(teamTournDF)) {
-        
-        print(paste0("Team/Tourn Loop = ", i))  
-      
+
         teamTournTempJSON <- fromJSON(paste0("http://api.lolesports.com/api/v1/teams?slug=", teamTournDF[i, "teamSlug"], "&tournament=", teamTournDF[i, "tournamentID"]))
         
         ## Extract players
@@ -43,14 +41,12 @@ createTeamPlayerDatabase <- function(tournamentList = tournamentList, environmen
 
         ## Add tournamentID and team information
         playersTemp[,10] <- teamTournDF[i, "tournamentID"]
-        playersTemp[,11] <- teamTournDF[i, "teamSlug"]
-        playersTemp[,12] <- teamTournDF[i, "teamAcro"]
+        playersTemp[,11] <- teamTournDF[i, "teamAcro"]
         
         ## Rename new variables
         playersTemp <- rename(playersTemp,
                               tournamentID = V10,
-                              teamSlug = V11,
-                              teamAcro = V12)
+                              teamAcro = V11)
         
         ## Bind players temp df onto full df
         playersDatabase <- rbind(playersDatabase, playersTemp)
@@ -81,8 +77,6 @@ createTeamPlayerDatabase <- function(tournamentList = tournamentList, environmen
         ## Loop through teams extracting players
         for (j in 1:nrow(teamsTemp)){
             
-            print(paste0("Team/Player Loop = ", j))
-          
             ## Initialize teamPlayersTemp
             teamPlayersTemp <- data.frame(matrix(ncol = 2, nrow = 0))
             
@@ -105,6 +99,8 @@ createTeamPlayerDatabase <- function(tournamentList = tournamentList, environmen
         
         ## Bind teams temp df onto full df
         teamsDatabase <- rbind(teamsDatabase, teamsTemp)
+        
+        
                                                   
     }
     
@@ -112,6 +108,14 @@ createTeamPlayerDatabase <- function(tournamentList = tournamentList, environmen
     playersDatabase <- distinct(playersDatabase)
     teamsDatabase <- distinct(teamsDatabase)
     teamPlayersDatabase <- distinct(teamPlayersDatabase)
+    
+    ## Replace teamAcro with teamID in playersDatabase
+    teamsSubset <- select(teamsDatabase, teamAcro, teamID) %>%
+      distinct()
+    playersDatabase <- left_join(playersDatabase, teamsSubset,
+                                 by = "teamAcro") %>%
+      select(-teamAcro)
+    
     
     ## Put processed work into global env
     assign("playersDatabase", playersDatabase, envir = environment)

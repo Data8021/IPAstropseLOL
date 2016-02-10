@@ -58,10 +58,6 @@ extractGameList <- function(league = "all", rawTournList = leagueTournamentList,
                             gameName = character(),
                             gameRealm = character(),
                             gameCode = character(),
-                            rosterBlue = character(),
-                            rosterRed = character(),
-                            teamBlueWin = character(),
-                            teamRedWin = character(),
                             stringsAsFactors = FALSE)
   
   ## Loop through each league
@@ -124,56 +120,6 @@ extractGameList <- function(league = "all", rawTournList = leagueTournamentList,
             gameID <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["id"]] 
             gameName <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["generatedName"]] 
             
-            ## Test if input present
-            if ("input" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]])) {
-              
-              if ("roster" %in%names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[1]])) {
-              
-                ## Assign rosters
-                rosterBlue <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[1]][["roster"]]
-                rosterRed <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[2]][["roster"]]
-
-              } else {
-              
-                ## Assign no rosters
-                rosterBlue <- NA_character_
-                rosterRed <- NA_character_
-                
-              }
-              
-            } else {
-              
-              ## Assign no rosters
-              rosterBlue <- NA_character_
-              rosterRed <- NA_character_
-
-            }
-                  
-            ## Test if winner identified
-            if ("standings" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]])) {
-              
-              ## Determine winner
-              if (rosterBlue == rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["standings"]][["result"]][[1]][[1]][["roster"]]) {
-                
-                ## Assign winner
-                teamBlueWin <- "YES"
-                teamRedWin <- "NO"
-                
-              } else {
-                
-                ## Assign winner
-                teamBlueWin <- "NO"
-                teamRedWin <- "YES"
-              }
-              
-            } else {
-              
-              ## Assign no winner
-              teamBlueWin <- NA_character_
-              teamRedWin <- NA_character_
-              
-            }
-            
             ## Test for gameRealm and gameId
             if ("gameRealm" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]])) {
               
@@ -205,10 +151,6 @@ extractGameList <- function(league = "all", rawTournList = leagueTournamentList,
                                           gameName,
                                           gameRealm,
                                           gameCode,
-                                          rosterBlue,
-                                          rosterRed,
-                                          teamBlueWin,
-                                          teamRedWin,
                                           stringsAsFactors = FALSE)
             
             ## Bind on to primary df

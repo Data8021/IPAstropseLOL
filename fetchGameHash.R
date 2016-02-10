@@ -14,7 +14,7 @@ fetchGameHash <- function(gamesDF = leagueGames, environment = .GlobalEnv){
   
   ## Loop through matchList
   for (i in 1:nrow(matchList)){
-    
+    print(i)
     ## Fetch match information
     matchDataJSON <- fromJSON(paste0("http://api.lolesports.com/api/v2/highlanderMatchDetails?tournamentId=", matchList[i, "tournamentID"], "&matchId=", matchList[i, "matchID"]))
     
@@ -27,9 +27,6 @@ fetchGameHash <- function(gamesDF = leagueGames, environment = .GlobalEnv){
 
   }
   
-  ## Remove duplicates
-  gameIDMap <- distinct(gameIDMap)
-      
   ## Merge gameHash into gamesDF
   suppressMessages(leagueGames <- left_join(gamesDF, gameIDMap))
   
