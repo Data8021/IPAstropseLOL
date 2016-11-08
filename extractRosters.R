@@ -1,7 +1,7 @@
 ## Function to extract all rosters from a complete list
 ## of league tournament files
 
-extractRosters <- function(rawTournList = leagueTournamentList, environment = .GlobalEnv){
+extractRosters <- function(rawTournList){
   
   ## Create dataframe to hold roster information
   tournamentRosters <- data.frame(rosterID = character(),
@@ -22,7 +22,7 @@ extractRosters <- function(rawTournList = leagueTournamentList, environment = .G
       tournamentID <- rawTournList[[i]][["highlanderTournaments"]][[j]][["id"]]
       
       ## Extract rosters 
-      rosterList <- as.list(rawTournList[[i]][["highlanderTournaments"]][[j]][["rosters"]])
+      rosterList <- rawTournList[[i]][["highlanderTournaments"]][[j]][["rosters"]]
       
       ## Loop through each roster
       for (k in 1:length(rosterList)){
@@ -78,8 +78,7 @@ extractRosters <- function(rawTournList = leagueTournamentList, environment = .G
     
   }
   
-  ## Put final DF in specified env
-  assign("tournamentRosters", tournamentRosters, envir = environment)
+  ## Return final DF
+  return(tournamentRosters)
   
 }
-
