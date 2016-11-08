@@ -1,6 +1,5 @@
 ## Function to fetch one or more league's tournaments
 
-
 fetchLeagueTournaments <- function(league = "all") {
   suppressMessages(suppressWarnings(library(jsonlite)))
   suppressMessages(suppressWarnings(library(dplyr)))
@@ -9,7 +8,7 @@ fetchLeagueTournaments <- function(league = "all") {
   funcEnv <- environment()
   
   ## set up vector of leagues
-  leagues = c(1,2,3,4,5,6,7,8,9,12,14,17,18)
+  leagues = c(1,2,3,4,5,6,7,8,9,10,12,13,14,18,20,23,24,26,28,29)
   leagueNames <- c("all-star",
                    "na-lcs",
                    "eu-lcs",
@@ -19,10 +18,18 @@ fetchLeagueTournaments <- function(league = "all") {
                    "lpl",
                    "lms",
                    "world-championship",
+                   "msi",
                    "iwc",
+                   "opl",
                    "cblol",
-                   "copa-south",
-                   "copa-north")
+                   #"copa-south" formerly #17 missing now,
+                   "copa-north",
+                   "ulol",
+                   "cdl",
+                   "cls",
+                   "fr",
+                   "sdp",
+                   "tpc")
   names(leagues) <- leagueNames
   
   ## Populate league if "all"
@@ -36,10 +43,18 @@ fetchLeagueTournaments <- function(league = "all") {
                 "lpl",
                 "lms",
                 "world-championship",
+                "msi",
                 "iwc",
+                "opl",
                 "cblol",
-                "copa-south",
-                "copa-north")
+                #"copa-south"??,
+                "copa-north",
+                "ulol",
+                "cdl",
+                "cls",
+                "fr",
+                "sdp",
+                "tpc")
   }
   
   ## Test if league exists
@@ -51,7 +66,7 @@ fetchLeagueTournaments <- function(league = "all") {
   leagueTournamentList <- vector("list", length(league))
   names(leagueTournamentList) <- league
   
-  ## Loop through each league requested and download faw tournament file from API
+  ## Loop through each league requested and download raw tournament file from API
   for (i in 1:length(league)) {
     leagueTournamentList[[i]] <- fromJSON(paste0("http://api.lolesports.com/api/v2/highlanderTournaments?league=", leagues[league[i]]),
                                           simplifyVector = FALSE,
@@ -59,54 +74,5 @@ fetchLeagueTournaments <- function(league = "all") {
                                           simplifyMatrix = FALSE)
   }
   
-  ## Extract game data from tournament files
-  extractGameList(league = league, rawTournList = leagueTournamentList, environment = funcEnv)
-  
-  ## Extract list of unique tournamentIDs
-  tournamentList <- select(leagueGames, tournamentID) %>%
-    distinct()
-  
-  ## Fetch player tournament stats
-  fetchPlayerStats(tournamentList = tournamentList, environment = funcEnv)
-  
-  ## Create player and team databases
-  createTeamPlayerDatabase(tournamentList = tournamentList, environment = funcEnv)
-  
-  ## Fetch gamehash and merge with leagueGames
-  fetchGameHash(gamesDF = leagueGames, environment = funcEnv)
-  
-  ## Fetch game data
-  
-  
-  
-  ## Put processed work into global env
-  assign("leagueTournamentList", leagueTournamentList, envir = .GlobalEnv)
-  ## assign("tournamentRosters", tournamentRosters, envir = .GlobalEnv)  
-  assign("leagueGames", leagueGames, envir = .GlobalEnv)  
-  assign("playerStatsTourn", playerStatsTourn, envir = .GlobalEnv)
-  assign("playersDatabase", playersDatabase, envir = .GlobalEnv)
-  assign("teamsDatabase", teamsDatabase, envir = .GlobalEnv)  
-  assign("teamPlayersDatabase", teamPlayersDatabase, envir = .GlobalEnv)
-  
+  return(leagueTournamentList)
 }
-
-## Save processed data
-save(leagueTournamentList, file="data/leagueTournamentList.Rda")
-save(leagueGames, file="data/leagueGames.Rda")
-save(tournamentRosters, file="data/tournamentRosters.Rda")
-save(playerStatsTourn, file="data/playerStatsTourn.Rda")
-save(playersDatabase, file="data/playersDatabase.Rda")
-save(teamsDatabase, file="data/teamsDatabase.Rda")
-save(teamPlayersDatabase, file="data/teamPlayersDatabase.Rda")
-
-save(fullGameList, file="data/fullGameList.Rda")
-
-## Load processed data
-load("data/leagueTournamentList.Rda")
-load("data/leagueGames.Rda")
-load("data/tournamentRosters.Rda")
-load("data/playerStatsTourn.Rda")
-load("data/playersDatabase.Rda")
-load("data/teamsDatabase.Rda")
-load("data/teamPlayersDatabase.Rda")
-load("data/fullGameList.Rda")

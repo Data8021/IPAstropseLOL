@@ -1,10 +1,10 @@
 ## Function to extract high level game information from
 ## a complete list of league tournament files
 
-extractGameList <- function(league = "all", rawTournList = leagueTournamentList, environment = .GlobalEnv){
+extractGameList <- function(league = "all", rawTournList){
   
   ## set up vector of leagues
-  leagues = c(1,2,3,4,5,6,7,8,9,12,14,17,18)
+  leagues = c(1,2,3,4,5,6,7,8,9,10,12,13,14,18,20,23,24,26,28,29)
   leagueNames <- c("all-star",
                    "na-lcs",
                    "eu-lcs",
@@ -14,10 +14,18 @@ extractGameList <- function(league = "all", rawTournList = leagueTournamentList,
                    "lpl",
                    "lms",
                    "world-championship",
+                   "msi",
                    "iwc",
+                   "opl",
                    "cblol",
-                   "copa-south",
-                   "copa-north")
+                   #"copa-south" formerly #17 missing now,
+                   "copa-north",
+                   "ulol",
+                   "cdl",
+                   "cls",
+                   "fr",
+                   "sdp",
+                   "tpc")
   names(leagues) <- leagueNames
   
   ## Populate league if "all"
@@ -31,10 +39,18 @@ extractGameList <- function(league = "all", rawTournList = leagueTournamentList,
                 "lpl",
                 "lms",
                 "world-championship",
+                "msi",
                 "iwc",
+                "opl",
                 "cblol",
-                "copa-south",
-                "copa-north")
+                #"copa-south"??,
+                "copa-north",
+                "ulol",
+                "cdl",
+                "cls",
+                "fr",
+                "sdp",
+                "tpc")
   }
   
   ## Test if league exists
@@ -66,6 +82,27 @@ extractGameList <- function(league = "all", rawTournList = leagueTournamentList,
     
     ## Loop through each tournament
     for (j in 1:length(rawTournList[[league[i]]][["highlanderTournaments"]])) {
+      
+      ## Store Roster information
+      blueRosterResults <- data.frame(blueRosterID = as.character(),
+                                      blueTeamAcro = as.character(),
+                                      blueTeamNum = as.character(),
+                                      stringsAsFactors = FALSE)
+      
+      for (p in 1:length(rawTournList[[i]][["highlanderTournaments"]][[j]][["rosters"]])) {
+        if("team" %in% names(rawTournList[[i]][["highlanderTournaments"]][[j]][["rosters"]][[p]])) {
+          blueRosterResults[p,1] <- rawTournList[[i]][["highlanderTournaments"]][[j]][["rosters"]][[p]][["id"]]
+          blueRosterResults[p,2] <- rawTournList[[i]][["highlanderTournaments"]][[j]][["rosters"]][[p]][["name"]]
+          blueRosterResults[p,3] <- rawTournList[[i]][["highlanderTournaments"]][[j]][["rosters"]][[p]][["team"]]
+        }
+      }
+      
+      ## Dupliucate it for red team
+      redRosterResults <- blueRosterResults
+      redRosterResults <- rename(redRosterResults,
+                                 redRosterID = blueRosterID,
+                                 redTeamAcro = blueTeamAcro,
+                                 redTeamNum = blueTeamNum)
       
       ## Store tournament information
       tournamentID <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["id"]]
@@ -134,7 +171,39 @@ extractGameList <- function(league = "all", rawTournList = leagueTournamentList,
               gameCode <- NA_character_
               
             }
-          
+            
+            ## Test if rosters exist
+            if("input" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]]) &
+               "roster" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[1]]) &
+               "roster" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[2]])) {
+              
+              ## Store teams
+              blueRosterID <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[1]][["roster"]]
+              redRosterID <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[2]][["roster"]]
+            
+            } else {
+              
+              ## Store no teams
+              blueRosterID <- NA_character_
+              redRosterID <- NA_character_
+            }  
+            
+            ## Test if game actually played
+            if("standings" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]])) {
+              
+              ## Store winner
+              blueWinner <- blueRosterID == rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["standings"]][[1]][[1]][[1]][["roster"]]  
+              redWinner <- redRosterID ==rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["standings"]][[1]][[1]][[1]][["roster"]]
+              
+            } else {
+              
+              ## Store no winners
+              blueWinner <- FALSE
+              redWinner <- FALSE
+            
+            } 
+            
+            
             ## Create tempDF
             leagueGamesTemp <- data.frame(tournamentID,
                                           tournamentName,
@@ -151,10 +220,18 @@ extractGameList <- function(league = "all", rawTournList = leagueTournamentList,
                                           gameName,
                                           gameRealm,
                                           gameCode,
+                                          blueRosterID,
+                                          redRosterID,
+                                          blueWinner,
+                                          redWinner,
                                           stringsAsFactors = FALSE)
             
+            ## Join with Blue/Red Rosters
+            leagueGamesTemp <- left_join(leagueGamesTemp, blueRosterResults, by = "blueRosterID")
+            leagueGamesTemp <- left_join(leagueGamesTemp, redRosterResults, by = "redRosterID")
+            
             ## Bind on to primary df
-            leagueGames <- rbind(leagueGames, leagueGamesTemp)  
+            leagueGames <- rbind(leagueGames, leagueGamesTemp)
             
           }
             
@@ -166,8 +243,8 @@ extractGameList <- function(league = "all", rawTournList = leagueTournamentList,
     
   }
   
-  ## Put final DF in specified env
-  assign("leagueGames", leagueGames, envir = environment)
+  ## return final df
+  return(leagueGames)
   
 }
 
