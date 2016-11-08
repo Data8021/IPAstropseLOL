@@ -1,6 +1,6 @@
 ## Function to fetch game data from a list of matches
 
-fetchGameHash <- function(gamesDF = leagueGames, environment = .GlobalEnv){
+fetchGameDetails <- function(gamesDF) {
   suppressMessages(suppressWarnings(library(jsonlite)))
   suppressMessages(suppressWarnings(library(dplyr)))
   
@@ -12,8 +12,10 @@ fetchGameHash <- function(gamesDF = leagueGames, environment = .GlobalEnv){
   names(fullGameList) <- gamesListNames
   rm(gamesListNames)
   
+  gamesDF$gameCode <- gsub("\\t","", gamesDF$gameCode)
+  
   ## Loop through all games
-  for (i in 1:nrow(gamesDF)){
+  for (i in 1450:nrow(gamesDF)){
     print(i)
     
     ## Fetch game JSON file
@@ -21,32 +23,29 @@ fetchGameHash <- function(gamesDF = leagueGames, environment = .GlobalEnv){
                                            gamesDF[i, "gameRealm"], "/", gamesDF[i, "gameCode"], "?gameHash=", 
                                            gamesDF[i, "gameHash"]))
     
-    
-    
-    
   }
   
   
-  players <- vector()
-  
-  for (i in 1:length(fullGameList)){
-    
-    players <- c(players, fullGameList[[i]][[13]][[2]][[1]])
-    
-  }
-  
-  uniplayers <- unique(players)
-  
-  uniplayers <- sapply(uniplayers, function(x) gsub(".* ","", x))
-  uniplayers <- unname(uniplayers)
-  
-  inPlayerDB <- sapply(uniplayers, function(x) x %in% playerStatsTourn$playerName)
-  
-  notInDB <- uniplayers[!inPlayerDB]
-  
-  ## Put final DF in specified env
-  ##assign("leagueGames", leagueGames, envir = environment)
-  
+#   players <- vector()
+#   
+#   for (i in 1:length(fullGameList)){
+#     
+#     players <- c(players, fullGameList[[i]][[13]][[2]][[1]])
+#     
+#   }
+#   
+#   uniplayers <- unique(players)
+#   
+#   uniplayers <- sapply(uniplayers, function(x) gsub(".* ","", x))
+#   uniplayers <- unname(uniplayers)
+#   
+#   inPlayerDB <- sapply(uniplayers, function(x) x %in% playerStatsTourn$playerName)
+#   
+#   notInDB <- uniplayers[!inPlayerDB]
+#   
+#   ## Put final DF in specified env
+#   ##assign("leagueGames", leagueGames, envir = environment)
+#   
 }
 
 

@@ -1,6 +1,6 @@
 ## Function to fetch player stats based on a list of league tournaments
 
-createTeamPlayerDatabase <- function(tournamentList = tournamentList, environment = .GlobalEnv) {
+createTeamPlayerDatabase <- function(tournamentList = tournamentList) {
     
     suppressMessages(suppressWarnings(library(jsonlite)))
     suppressMessages(suppressWarnings(library(dplyr)))

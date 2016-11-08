@@ -1,62 +1,7 @@
 ## Function to extract high level game information from
 ## a complete list of league tournament files
 
-extractGameList <- function(league = "all", rawTournList){
-  
-  ## set up vector of leagues
-  leagues = c(1,2,3,4,5,6,7,8,9,10,12,13,14,18,20,23,24,26,28,29)
-  leagueNames <- c("all-star",
-                   "na-lcs",
-                   "eu-lcs",
-                   "na-cs",
-                   "eu-cs",
-                   "lck",
-                   "lpl",
-                   "lms",
-                   "world-championship",
-                   "msi",
-                   "iwc",
-                   "opl",
-                   "cblol",
-                   #"copa-south" formerly #17 missing now,
-                   "copa-north",
-                   "ulol",
-                   "cdl",
-                   "cls",
-                   "fr",
-                   "sdp",
-                   "tpc")
-  names(leagues) <- leagueNames
-  
-  ## Populate league if "all"
-  if (any(league == "all")) {
-    league <- c("all-star",
-                "na-lcs",
-                "eu-lcs",
-                "na-cs",
-                "eu-cs",
-                "lck",
-                "lpl",
-                "lms",
-                "world-championship",
-                "msi",
-                "iwc",
-                "opl",
-                "cblol",
-                #"copa-south"??,
-                "copa-north",
-                "ulol",
-                "cdl",
-                "cls",
-                "fr",
-                "sdp",
-                "tpc")
-  }
-  
-  ## Test if league exists
-  if (any(!(league %in% leagueNames))) {
-    stop("League does not exist.")
-  }
+extractGameList <- function(rawTournList){
   
   ## Initialize df to hold games
   leagueGames <- data.frame(tournamentID = character(),
@@ -77,13 +22,20 @@ extractGameList <- function(league = "all", rawTournList){
                             stringsAsFactors = FALSE)
   
   ## Loop through each league
-  for (i in 1:length(league)) {
+  for (i in 1:length(rawTournList)) {
 
     
     ## Loop through each tournament
-    for (j in 1:length(rawTournList[[league[i]]][["highlanderTournaments"]])) {
+    for (j in 1:length(rawTournList[[i]][["highlanderTournaments"]])) {
       
-      ## Store Roster information
+      
+      ## Store tournament information
+      tournamentID <- rawTournList[[i]][["highlanderTournaments"]][[j]][["id"]]
+      tournamentName <- rawTournList[[i]][["highlanderTournaments"]][[j]][["title"]]
+      tournamentDescription <- rawTournList[[i]][["highlanderTournaments"]][[j]][["description"]]
+      tournamentLeague <- rawTournList[[i]][["highlanderTournaments"]][[j]][["league"]]
+      
+      ## Store tournament Roster information
       blueRosterResults <- data.frame(blueRosterID = as.character(),
                                       blueTeamAcro = as.character(),
                                       blueTeamNum = as.character(),
@@ -104,17 +56,11 @@ extractGameList <- function(league = "all", rawTournList){
                                  redTeamAcro = blueTeamAcro,
                                  redTeamNum = blueTeamNum)
       
-      ## Store tournament information
-      tournamentID <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["id"]]
-      tournamentName <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["title"]]
-      tournamentDescription <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["description"]]
-      tournamentLeague <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["league"]]
-      
       ## Test if start and end dates are included
       if ("startDate" %in% names(rawTournList[[i]][["highlanderTournaments"]][[j]])) {
         
-        tournamentStartDate = rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["startDate"]]
-        tournamentEndDate = rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["endDate"]]
+        tournamentStartDate = rawTournList[[i]][["highlanderTournaments"]][[j]][["startDate"]]
+        tournamentEndDate = rawTournList[[i]][["highlanderTournaments"]][[j]][["endDate"]]
         
       } else {
         
@@ -123,16 +69,16 @@ extractGameList <- function(league = "all", rawTournList){
       }
       
       ## Loop through each bracket
-      for (k in 1:length(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]])) {
+      for (k in 1:length(rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]])) {
         
         ## Store bracket information
-        bracketID <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["id"]]
+        bracketID <- rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["id"]]
         
         ## Test if bracket name is present
-        if ("name" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]])) {
+        if ("name" %in% names(rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]])) {
           
           ## Assign bracket name
-          bracketName <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["name"]]
+          bracketName <- rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["name"]]
           
         } else {
           
@@ -143,26 +89,26 @@ extractGameList <- function(league = "all", rawTournList){
         
         
         ## Loop through each match
-        for (l in 1:length(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]])) {
+        for (l in 1:length(rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]])) {
           
           ## Store match information
-          matchID <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["id"]]
-          matchName <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["name"]]
-          matchPosition <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["position"]]
+          matchID <- rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["id"]]
+          matchName <- rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["name"]]
+          matchPosition <- rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["position"]]
           
           ## Loop through each game
-          for (m in 1:length(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]])) {
+          for (m in 1:length(rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]])) {
             
             ## Store game information
-            gameID <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["id"]] 
-            gameName <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["generatedName"]] 
+            gameID <- rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["id"]] 
+            gameName <- rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["generatedName"]] 
             
             ## Test for gameRealm and gameId
-            if ("gameRealm" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]])) {
+            if ("gameRealm" %in% names(rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]])) {
               
               ## Store gameRealm/gameCode
-              gameRealm <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["gameRealm"]]
-              gameCode <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["gameId"]]
+              gameRealm <- rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["gameRealm"]]
+              gameCode <- rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["gameId"]]
               
             } else {
               
@@ -173,13 +119,13 @@ extractGameList <- function(league = "all", rawTournList){
             }
             
             ## Test if rosters exist
-            if("input" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]]) &
-               "roster" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[1]]) &
-               "roster" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[2]])) {
+            if("input" %in% names(rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]]) &
+               "roster" %in% names(rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[1]]) &
+               "roster" %in% names(rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[2]])) {
               
               ## Store teams
-              blueRosterID <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[1]][["roster"]]
-              redRosterID <- rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[2]][["roster"]]
+              blueRosterID <- rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[1]][["roster"]]
+              redRosterID <- rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["input"]][[2]][["roster"]]
             
             } else {
               
@@ -189,11 +135,11 @@ extractGameList <- function(league = "all", rawTournList){
             }  
             
             ## Test if game actually played
-            if("standings" %in% names(rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]])) {
+            if("standings" %in% names(rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]])) {
               
               ## Store winner
-              blueWinner <- blueRosterID == rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["standings"]][[1]][[1]][[1]][["roster"]]  
-              redWinner <- redRosterID ==rawTournList[[league[i]]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["standings"]][[1]][[1]][[1]][["roster"]]
+              blueWinner <- blueRosterID == rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["standings"]][[1]][[1]][[1]][["roster"]]  
+              redWinner <- redRosterID ==rawTournList[[i]][["highlanderTournaments"]][[j]][["brackets"]][[k]][["matches"]][[l]][["games"]][[m]][["standings"]][[1]][[1]][[1]][["roster"]]
               
             } else {
               
